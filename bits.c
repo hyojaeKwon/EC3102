@@ -186,7 +186,28 @@ int logicalShift(int x, int n) {
  *   Rating: 4
  */
 int bitCount(int x) {
-  return 2;
+  int cal = 0x1;
+  int result = 0 ;
+
+  cal = cal | (cal << 8); // 00000001 00000001 만들기
+  cal = cal | (cal << 16); // 00000001 00000001 00000001 00000001 만들기
+
+  result += cal & x;
+  result += cal & (x >> 1);
+  result += cal & (x >> 2);
+  result += cal & (x >> 3);
+  result += cal & (x >> 4);
+  result += cal & (x >> 5);
+  result += cal & (x >> 6);
+  result += cal & (x >> 7);
+  // x를 하나씩 오른쪽으로 shift하면서 더해준다.
+  
+  result += result >> 16;
+  result += result >> 8;
+  //그리고 다시 이 4개의 bits를 하나로 모은다.
+
+  //마지막으로 0xff를 & 해줘서 가장 오른쪽 비트의 숫자만 구한다.
+  return result & 0xff;
 }
 /* 
  * bang - Compute !x without using !
@@ -196,7 +217,10 @@ int bitCount(int x) {
  *   Rating: 4 
  */
 int bang(int x) {
-  return 2;
+  int new_x = ~x + 1;
+  int temp = new_x | x;
+
+  return (temp >> 31) + 1;
 }
 /* 
  * tmin - return minimum two's complement integer 
