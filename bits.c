@@ -155,11 +155,11 @@ int bitAnd(int x, int y)
 int getByte(int x, int n)
 {
   int changeBite = n;
-  changeBite = changeBite << 3;
+  changeBite = changeBite << 3; // 8을 곱해주는 코드
 
-  x = x >> changeBite;
+  x = x >> changeBite; // 만약 0이면 0, 1이면 8자리 right shift하고
 
-  return x & 0xFF;
+  return x & 0xFF; //마지막 8자리를 선택하는 코드
 }
 /*
  * logicalShift - shift x to the right by n, using a logical shift
