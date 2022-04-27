@@ -231,7 +231,9 @@ int bang(int x)
  */
 int tmin(void)
 {
-  return 2;
+  int x = 0x1;
+  x = x << 31;
+  return x;
 }
 /*
  * fitsBits - return 1 if x can be represented as an
@@ -244,7 +246,11 @@ int tmin(void)
  */
 int fitsBits(int x, int n)
 {
-  return 2;
+  int times = 33 + (~n);
+
+  int new_x = (x << times) >> times;
+  int ans = new_x ^ x;
+  return !(ans);
 }
 /*
  * divpwr2 - Compute x/(2^n), for 0 <= n <= 30
@@ -256,7 +262,14 @@ int fitsBits(int x, int n)
  */
 int divpwr2(int x, int n)
 {
-  return 2;
+  x = x >> n;
+  int calc = 0x1;
+  calc = calc << 32;
+  calc = ~calc;
+
+  // calc = calc >> n;
+
+  return (calc);
 }
 /*
  * negate - return -x
@@ -267,7 +280,7 @@ int divpwr2(int x, int n)
  */
 int negate(int x)
 {
-  return 2;
+  return ~x + 1;
 }
 /*
  * isPositive - return 1 if x > 0, return 0 otherwise
@@ -278,7 +291,11 @@ int negate(int x)
  */
 int isPositive(int x)
 {
-  return 2;
+  int isZero = !x; //만약 0이라면 1이 저장됨
+  x = !(x >> 31);
+  // 0을 걸러내야 함
+
+  return x ^ isZero;
 }
 /*
  * isLessOrEqual - if x <= y  then return 1, else return 0
