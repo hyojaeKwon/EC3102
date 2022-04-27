@@ -306,7 +306,10 @@ int isPositive(int x)
  */
 int isLessOrEqual(int x, int y)
 {
-  return 2;
+  int result = !(((~x + 1) + y) >> 31);
+  int signDifference = (!(x >> 31) ^ !(y >> 31));
+
+  return (signDifference & x >> 31) | (result & !signDifference);
 }
 /*
  * ilog2 - return floor(log base 2 of x), where x > 0
@@ -317,6 +320,7 @@ int isLessOrEqual(int x, int y)
  */
 int ilog2(int x)
 {
+  x = x;
   return 2;
 }
 /*
@@ -332,7 +336,14 @@ int ilog2(int x)
  */
 unsigned float_neg(unsigned uf)
 {
-  return 2;
+  int result = 0x80000000 ^ uf;
+
+  int exp = 0x7F800000 & uf;
+  int mantissa = 0x007FFFFF & uf;
+  if ((exp == 0x7F800000) && mantissa)
+    return uf;
+
+  return result;
 }
 /*
  * float_i2f - Return bit-level equivalent of expression (float) x
@@ -345,7 +356,48 @@ unsigned float_neg(unsigned uf)
  */
 unsigned float_i2f(int x)
 {
-  return 2;
+  int sign = x & 0x80000000;
+  int exp, frac, round;
+  int bit = 1;
+  int mask = 0x7fffff;
+  if (x == 0)
+  {
+    return 0;
+  }
+  if (x == 0x80000000)
+  {
+    return 0xCF000000;
+  }
+
+  if (sign)
+  {
+    x = -x;
+  }
+  while ((x >> bit) != 0)
+  {
+    bit += 1;
+  }
+  bit--;
+  exp = bit + 127;
+
+  x = x << (31 - bit);
+  frac = mask & (x >> 8);
+
+  if (bit > 23)
+  { //부동소수점에서 rounding 계산.
+    round = x & 0xFF;
+    if ((round > 128) || ((round == 128) && (frac & 1)))
+    {
+      frac++;
+      if (frac >> 23)
+      {
+        exp++;
+        frac = 0;
+      }
+    }
+  }
+
+  return sign | (exp << 23) | frac;
 }
 /*
  * float_twice - Return bit-level equivalent of expression 2*f for
@@ -360,5 +412,13 @@ unsigned float_i2f(int x)
  */
 unsigned float_twice(unsigned uf)
 {
+  int exp = 0x7F800000 & uf;
+  int sign = 0x80000000 & uf;
+  if (exp == 0x7F800000)
+    return uf;
+  else if (exp == 0) // Denormalized를 2배할 때는 sign bit를 제외한 나머지 bit들을1칸씩 left shift하면 됨.
+    return sign | (uf << 1);
+  else // Normalized를 2배할 때는 exp에 1을 더해주면 됨.
+    return uf + 0x00800000;
   return 2;
 }
